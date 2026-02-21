@@ -22,8 +22,8 @@ export default function AppNavbar({ currentPageName, user }) {
     enabled: !!user?.email,
   });
   const credits = profiles?.[0]?.credits_balance ?? null;
+  const isAdmin = user?.role === "admin";
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -46,31 +46,40 @@ export default function AppNavbar({ currentPageName, user }) {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        background: "rgba(10,10,15,0.85)",
+        background: "rgba(12,12,12,0.92)",
         backdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}>
-        <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-14 gap-4">
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px", gap: "16px" }}>
 
           {/* Logo */}
-          <Link
-            to={createPageUrl("Dashboard")}
-            style={{ textDecoration: "none", flexShrink: 0 }}
-          >
-            <span style={{
-              fontWeight: 700,
-              fontSize: "17px",
-              background: "linear-gradient(135deg, #a5b4fc, #8b5cf6)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              letterSpacing: "-0.02em",
-            }}>
-              ContentAudit<span style={{ opacity: 0.7 }}>Pro</span>
-            </span>
+          <Link to={createPageUrl("Dashboard")} style={{ textDecoration: "none", flexShrink: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+              <span style={{
+                fontWeight: 900,
+                fontSize: "15px",
+                color: "#f0ebe3",
+                letterSpacing: "-0.02em",
+                fontFamily: "'Inter', sans-serif",
+                textTransform: "uppercase",
+              }}>
+                Content
+              </span>
+              <span style={{
+                fontWeight: 900,
+                fontSize: "15px",
+                color: "#f97316",
+                letterSpacing: "-0.02em",
+                fontFamily: "'Inter', sans-serif",
+                textTransform: "uppercase",
+              }}>
+                Audit Pro
+              </span>
+            </div>
           </Link>
 
           {/* Center nav — desktop */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1" style={{ flex: 1, justifyContent: "center" }}>
             {NAV_LINKS.map((item) => {
               const isActive = currentPageName === item.page;
               return (
@@ -79,15 +88,29 @@ export default function AppNavbar({ currentPageName, user }) {
                   to={createPageUrl(item.page)}
                   style={{
                     textDecoration: "none",
-                    padding: "6px 14px",
-                    borderRadius: "10px",
+                    padding: "7px 16px",
+                    borderRadius: "6px",
                     fontSize: "13px",
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? "#c7d2fe" : "#64748b",
-                    background: isActive ? "rgba(99,102,241,0.15)" : "transparent",
+                    fontWeight: 600,
+                    color: isActive ? "#f97316" : "#a89e92",
+                    background: isActive ? "rgba(249,115,22,0.1)" : "transparent",
                     transition: "all 0.15s",
+                    letterSpacing: "0.01em",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
                   }}
                 >
+                  {isActive && (
+                    <span style={{
+                      width: "5px",
+                      height: "5px",
+                      background: "#f97316",
+                      clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }} />
+                  )}
                   {item.label}
                 </Link>
               );
@@ -95,9 +118,26 @@ export default function AppNavbar({ currentPageName, user }) {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
-            {/* Credits badge */}
-            {credits !== null && (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            {/* Credits badge / Admin badge */}
+            {isAdmin ? (
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                background: "rgba(249,115,22,0.12)",
+                border: "1px solid rgba(249,115,22,0.35)",
+                borderRadius: "6px",
+                padding: "4px 10px",
+                fontSize: "11px",
+                fontWeight: 800,
+                color: "#f97316",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}>
+                ∞ Admin
+              </div>
+            ) : credits !== null && (
               <Link
                 to={createPageUrl("Billing")}
                 style={{
@@ -105,17 +145,16 @@ export default function AppNavbar({ currentPageName, user }) {
                   display: "flex",
                   alignItems: "center",
                   gap: "5px",
-                  background: "rgba(99,102,241,0.12)",
-                  border: "1px solid rgba(99,102,241,0.3)",
-                  borderRadius: "999px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "6px",
                   padding: "4px 12px",
                   fontSize: "12px",
                   fontWeight: 700,
-                  color: "#a5b4fc",
-                  flexShrink: 0,
+                  color: "#a89e92",
                 }}
               >
-                {credits} kr
+                {credits} <span style={{ color: "#5a5248" }}>kr</span>
               </Link>
             )}
 
@@ -126,31 +165,32 @@ export default function AppNavbar({ currentPageName, user }) {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "7px",
                   background: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "999px",
-                  padding: "4px 10px 4px 4px",
+                  borderRadius: "6px",
+                  padding: "5px 10px 5px 5px",
                   cursor: "pointer",
-                  color: "#94a3b8",
+                  color: "#a89e92",
                 }}
               >
                 <div style={{
                   width: "28px",
                   height: "28px",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  borderRadius: "4px",
+                  background: "#f97316",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "11px",
-                  fontWeight: 700,
-                  color: "white",
+                  fontWeight: 900,
+                  color: "#0c0c0c",
                   flexShrink: 0,
+                  fontFamily: "'Inter', sans-serif",
                 }}>
                   {initials}
                 </div>
-                <ChevronDown style={{ width: "13px", height: "13px" }} />
+                <ChevronDown style={{ width: "12px", height: "12px" }} />
               </button>
 
               {dropdownOpen && (
@@ -158,19 +198,19 @@ export default function AppNavbar({ currentPageName, user }) {
                   position: "absolute",
                   right: 0,
                   top: "calc(100% + 8px)",
-                  background: "#13131a",
+                  background: "#181818",
                   border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "14px",
+                  borderRadius: "10px",
                   padding: "6px",
-                  minWidth: "180px",
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+                  minWidth: "190px",
+                  boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
                   zIndex: 200,
                 }}>
                   <div style={{ padding: "8px 12px 10px", borderBottom: "1px solid rgba(255,255,255,0.07)", marginBottom: "4px" }}>
-                    <p style={{ fontSize: "12px", fontWeight: 600, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: "12px", fontWeight: 700, color: "#f0ebe3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {user?.full_name || user?.email}
                     </p>
-                    <p style={{ fontSize: "11px", color: "#475569", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: "11px", color: "#5a5248", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {user?.email}
                     </p>
                   </div>
@@ -184,7 +224,7 @@ export default function AppNavbar({ currentPageName, user }) {
             <button
               className="md:hidden"
               onClick={() => setMobileOpen((v) => !v)}
-              style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: "4px" }}
+              style={{ background: "none", border: "none", color: "#a89e92", cursor: "pointer", padding: "4px" }}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -195,8 +235,8 @@ export default function AppNavbar({ currentPageName, user }) {
         {mobileOpen && (
           <div style={{
             borderTop: "1px solid rgba(255,255,255,0.07)",
-            background: "rgba(10,10,15,0.97)",
-            padding: "12px 16px 20px",
+            background: "rgba(12,12,12,0.98)",
+            padding: "12px 20px 20px",
           }} className="md:hidden">
             {NAV_LINKS.map((item) => {
               const isActive = currentPageName === item.page;
@@ -209,11 +249,11 @@ export default function AppNavbar({ currentPageName, user }) {
                     display: "block",
                     textDecoration: "none",
                     padding: "11px 14px",
-                    borderRadius: "10px",
+                    borderRadius: "6px",
                     fontSize: "14px",
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? "#c7d2fe" : "#64748b",
-                    background: isActive ? "rgba(99,102,241,0.12)" : "transparent",
+                    fontWeight: 700,
+                    color: isActive ? "#f97316" : "#a89e92",
+                    background: isActive ? "rgba(249,115,22,0.08)" : "transparent",
                     marginBottom: "2px",
                   }}
                 >
@@ -234,16 +274,17 @@ function DropdownItem({ icon: Icon, label, to, onClick, danger }) {
     alignItems: "center",
     gap: "10px",
     padding: "9px 12px",
-    borderRadius: "8px",
+    borderRadius: "6px",
     fontSize: "13px",
-    fontWeight: 500,
-    color: danger ? "#f87171" : "#94a3b8",
+    fontWeight: 600,
+    color: danger ? "#ef4444" : "#a89e92",
     background: "none",
     border: "none",
     width: "100%",
     cursor: "pointer",
     textDecoration: "none",
     transition: "background 0.1s",
+    fontFamily: "'Inter', sans-serif",
   };
 
   const content = (
