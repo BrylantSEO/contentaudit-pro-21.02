@@ -4,7 +4,8 @@ import { createPageUrl } from "../utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import PageMeta from "../components/layout/PageMeta";
-import { Plus, Coins, CreditCard, ExternalLink, AlertCircle } from "lucide-react";
+import { Plus, Coins, CreditCard, ExternalLink, AlertCircle, Trash2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 
@@ -28,8 +29,16 @@ function StatusBadge({ status }) {
   );
 }
 
-function AuditRow({ job }) {
+function AuditRow({ job, onDelete }) {
   const shortUrl = job.url?.length > 50 ? job.url.slice(0, 50) + "…" : job.url;
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Na pewno usunąć ten audyt?")) return;
+    await base44.entities.AuditJob.delete(job.id);
+    onDelete();
+  };
 
   return (
     <Link
@@ -89,6 +98,15 @@ function AuditRow({ job }) {
           : ""}
       </div>
 
+      {/* Delete button */}
+      <button
+        onClick={handleDelete}
+        className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-500/10"
+        title="Usuń audyt"
+      >
+        <Trash2 className="w-4 h-4" style={{ color: "#f87171" }} />
+      </button>
+
       <ExternalLink className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "#6366f1" }} />
     </Link>
   );
@@ -107,6 +125,8 @@ export default function Dashboard() {
     enabled: !!user?.email,
   });
 
+  const queryClient = useQueryClient();
+
   const { data: auditJobs, isLoading } = useQuery({
     queryKey: ["auditJobs", user?.email],
     queryFn: () => base44.entities.AuditJob.list("-created_date", 50),
@@ -115,6 +135,10 @@ export default function Dashboard() {
 
   const profile = profiles?.[0];
   const jobs = auditJobs || [];
+
+  const handleDeleteRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["auditJobs"] });
+  };
 
   return (
     <div
@@ -230,7 +254,7 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-3">
               {jobs.map((job) => (
-                <AuditRow key={job.id} job={job} />
+                <AuditRow key={job.id} job={job} onDelete={handleDeleteRefresh} />
               ))}
             </div>
           )}
