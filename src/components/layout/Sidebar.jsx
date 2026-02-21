@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
+  // keep existing items below
   { name: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
   { name: "Kredyty", page: "Credits", icon: Coins },
   { name: "Ustawienia", page: "Settings", icon: Settings },
