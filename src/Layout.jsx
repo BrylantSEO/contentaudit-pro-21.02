@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import AppNavbar from "./components/layout/AppNavbar";
 
 const PUBLIC_PAGES = ["Home"];
+const AUTH_REQUIRED_PAGES = ["Dashboard", "AuditNew", "AuditDetail", "Credits", "Billing", "Settings", "AdminCredits"];
 const GA_KEY = "contentaudit_ga_measurement_id";
 
 function injectGA(measurementId) {
