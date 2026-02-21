@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import { Copy, Check, RotateCcw, FileDown } from "lucide-react";
-import MarkdownRenderer from "./MarkdownRenderer";
+import AuditResultsView from "./AuditResultsView";
 import { format } from "date-fns";
 
 function ScoreBadge({ label, value, max }) {
@@ -21,7 +21,7 @@ function ScoreBadge({ label, value, max }) {
   );
 }
 
-const TABS = ["📋 Raport", "📊 Scores", "🔍 Benchmark"];
+// Tabs are now handled inside AuditResultsView
 
 function isUrl(str) {
   return typeof str === "string" && (str.startsWith("http://") || str.startsWith("https://"));
@@ -48,7 +48,6 @@ function useFetchMarkdown(value) {
 }
 
 export default function AuditDone({ job }) {
-  const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
@@ -56,9 +55,8 @@ export default function AuditDone({ job }) {
   const scoresMd = useFetchMarkdown(job.result_scores_md);
   const benchmarkMd = useFetchMarkdown(job.result_benchmark_md);
 
-  const hasBenchmark = !!job.result_benchmark_md;
   const hasPdf = Array.isArray(job.modules) && job.modules.includes("pdf");
-  const visibleTabs = hasBenchmark ? TABS : TABS.slice(0, 2);
+  const isLoading = auditMd.loading;
 
   const cqs = job.result_cqs ?? 0;
   const citability = job.result_citability ?? 0;
@@ -89,11 +87,6 @@ export default function AuditDone({ job }) {
       modules: job.modules,
     }))}`);
   };
-
-  const tabs = [auditMd, scoresMd, benchmarkMd];
-  const currentTab = tabs[activeTab];
-  const currentContent = currentTab?.content;
-  const currentLoading = currentTab?.loading;
 
   return (
     <div style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
@@ -232,34 +225,25 @@ export default function AuditDone({ job }) {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: "4px", marginBottom: "24px", background: "rgba(255,255,255,0.03)", borderRadius: "14px", padding: "4px", width: "fit-content" }}>
-          {visibleTabs.map((tab, i) => (
-            <button key={i} onClick={() => setActiveTab(i)} style={{
-              padding: "8px 18px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
-              border: "none", cursor: "pointer", transition: "all 0.15s",
-              background: activeTab === i ? "rgba(99,102,241,0.2)" : "transparent",
-              color: activeTab === i ? "#c7d2fe" : "#475569",
-            }}>
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab content */}
-        <div style={{
-          background: "rgba(255,255,255,0.02)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderRadius: "20px",
-          padding: "32px",
-          minHeight: "400px",
-        }}>
-          {currentLoading ? (
-            <div style={{ color: "#475569", textAlign: "center", padding: "40px" }}>Ładowanie raportu...</div>
-          ) : (
-            <MarkdownRenderer content={currentContent} />
-          )}
-        </div>
+        {/* Results — reorganized by user value */}
+        {isLoading ? (
+          <div style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "20px",
+            padding: "60px 32px",
+            textAlign: "center",
+            color: "#475569",
+          }}>
+            Ładowanie raportu...
+          </div>
+        ) : (
+          <AuditResultsView
+            auditMd={auditMd.content}
+            scoresMd={scoresMd.content}
+            benchmarkMd={benchmarkMd.content}
+          />
+        )}
       </div>
     </div>
   );
