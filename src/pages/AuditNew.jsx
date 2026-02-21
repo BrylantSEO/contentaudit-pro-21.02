@@ -564,7 +564,7 @@ function ModuleRow({ label, cost, checked, disabled, dimmed, onChange }) {
         >
           {label}
         </span>
-        {disabled && (
+        {disabled && !dimmed && (
           <span
             style={{
               fontSize: "10px",
@@ -576,6 +576,20 @@ function ModuleRow({ label, cost, checked, disabled, dimmed, onChange }) {
             }}
           >
             zawsze
+          </span>
+        )}
+        {dimmed && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              color: "#334155",
+              background: "rgba(255,255,255,0.04)",
+              borderRadius: "6px",
+              padding: "1px 6px",
+            }}
+          >
+            wymaga frazy
           </span>
         )}
       </div>
