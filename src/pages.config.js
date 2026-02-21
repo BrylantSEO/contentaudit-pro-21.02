@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminCredits from './pages/AdminCredits';
 import AuditDetail from './pages/AuditDetail';
 import AuditNew from './pages/AuditNew';
 import Billing from './pages/Billing';
@@ -54,11 +55,11 @@ import Credits from './pages/Credits';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Settings from './pages/Settings';
-import AdminCredits from './pages/AdminCredits';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminCredits": AdminCredits,
     "AuditDetail": AuditDetail,
     "AuditNew": AuditNew,
     "Billing": Billing,
@@ -66,7 +67,6 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Home": Home,
     "Settings": Settings,
-    "AdminCredits": AdminCredits,
 }
 
 export const pagesConfig = {

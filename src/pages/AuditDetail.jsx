@@ -43,22 +43,15 @@ export default function AuditDetail() {
     if (user) fetchJob();
   }, [user, fetchJob]);
 
-  // Polling every 8s while running/queued — poll Railway then refresh from DB
+  // Polling every 5s — just refresh from DB (Railway sends callbacks)
   useEffect(() => {
     if (!job || (job.status !== "queued" && job.status !== "running")) return;
     const interval = setInterval(async () => {
-      // First, ask backend to poll Railway and save results
-      try {
-        await base44.functions.invoke("pollAuditStatus", { job_id: jobId });
-      } catch (e) {
-        console.log("Poll failed, will retry:", e.message);
-      }
-      // Then refresh from DB
       const updated = await fetchJob();
       if (updated?.status === "done" || updated?.status === "error") {
         clearInterval(interval);
       }
-    }, 8000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [job?.status, fetchJob, jobId]);
 
