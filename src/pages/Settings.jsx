@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import PageMeta from "../components/layout/PageMeta";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Shield, Coins } from "lucide-react";
+import { User, Shield, Coins, BarChart2, Check } from "lucide-react";
 
 const planLabels = {
   free: "Darmowy",
