@@ -186,9 +186,16 @@ export default function AuditNew() {
     navigate(createPageUrl(`AuditDetail?id=${job.id}`));
   };
 
+  // When keyword cleared → uncheck SERP modules
+  useEffect(() => {
+    if (!keyword.trim()) {
+      setOptionalModules((prev) => ({ ...prev, serp5: false, serp10: false }));
+    }
+  }, [keyword]);
+
   const toggleOptional = (id) => {
+    if ((id === "serp5" || id === "serp10") && serpDisabled) return;
     if (id === "serp5" || id === "serp10") {
-      // mutually exclusive
       setOptionalModules((prev) => ({
         ...prev,
         serp5: id === "serp5" ? !prev.serp5 : false,
