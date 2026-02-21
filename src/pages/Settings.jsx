@@ -37,6 +37,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-8 max-w-2xl">
+      <PageMeta title="Ustawienia — ContentAudit Pro" />
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
           Ustawienia

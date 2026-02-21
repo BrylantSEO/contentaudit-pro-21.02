@@ -114,6 +114,7 @@ export default function Billing() {
 
   return (
     <div style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif", paddingBottom: "80px" }}>
+      <PageMeta title="Kredyty — ContentAudit Pro" />
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-12">
 
         {/* Banners */}

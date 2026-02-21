@@ -121,6 +121,7 @@ export default function Dashboard() {
       style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif" }}
       className="p-6 md:p-10"
     >
+      <PageMeta title="Dashboard — ContentAudit Pro" />
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Header */}

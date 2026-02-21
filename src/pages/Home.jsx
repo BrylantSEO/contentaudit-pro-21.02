@@ -61,6 +61,10 @@ export default function Home() {
 
   return (
     <div style={{ background: "#0a0a0f", color: "#e2e8f0", fontFamily: "Inter, sans-serif" }} className="min-h-screen">
+      <PageMeta
+        title="ContentAudit Pro — Audyt semantyczny treści pod AI Search"
+        description="Sprawdź jakość treści pod kątem AI Search. CQS 0-100, 9 wymiarów analizy, SERP benchmark, rekomendacje BEFORE/AFTER. Zacznij za darmo."
+      />
 
       {/* ─── Navbar ─────────────────────────────────────────────────────────── */}
       <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
