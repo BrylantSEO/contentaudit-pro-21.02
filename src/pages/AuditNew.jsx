@@ -353,6 +353,68 @@ export default function AuditNew() {
         </div>
       </div>
 
+      {/* Insufficient credits modal */}
+      {insufficientModal && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 100,
+            background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: "24px",
+          }}
+          onClick={() => setInsufficientModal(null)}
+        >
+          <div
+            style={{
+              background: "#13131a", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "24px", padding: "32px", maxWidth: "400px", width: "100%",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div
+                style={{ background: "rgba(239,68,68,0.15)", borderRadius: "12px", padding: "10px" }}
+              >
+                <CreditCard className="w-6 h-6" style={{ color: "#f87171" }} />
+              </div>
+              <button onClick={() => setInsufficientModal(null)} style={{ color: "#475569", background: "none", border: "none", cursor: "pointer" }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: "#f8fafc" }}>Za mało kredytów</h3>
+            <p className="text-sm mb-1" style={{ color: "#94a3b8" }}>
+              Potrzebujesz <span style={{ color: "#f87171", fontWeight: 700 }}>{insufficientModal.needed} kr</span>, a masz{" "}
+              <span style={{ color: "#e2e8f0", fontWeight: 700 }}>{insufficientModal.have} kr</span>.
+            </p>
+            <p className="text-sm mb-6" style={{ color: "#475569" }}>
+              Brakuje {insufficientModal.needed - insufficientModal.have} kredytów.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setInsufficientModal(null)}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "12px",
+                  border: "1px solid rgba(255,255,255,0.1)", background: "transparent",
+                  color: "#94a3b8", fontSize: "14px", fontWeight: 600, cursor: "pointer",
+                }}
+              >
+                Anuluj
+              </button>
+              <Link
+                to={createPageUrl("Credits")}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "12px",
+                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  color: "white", fontSize: "14px", fontWeight: 700,
+                  textDecoration: "none", textAlign: "center",
+                }}
+              >
+                Doładuj
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sticky bar */}
       <div
         style={{
