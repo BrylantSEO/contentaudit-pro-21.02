@@ -37,25 +37,43 @@ export default function Home() {
       className="min-h-screen"
     >
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 md:px-16 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-          >
-            <Zap className="w-4 h-4 text-white" />
+      <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="flex items-center justify-between px-6 md:px-16 py-4 max-w-7xl mx-auto">
+          <Link to={createPageUrl("Home")} style={{ textDecoration: "none" }}>
+            <span style={{
+              fontWeight: 700,
+              fontSize: "17px",
+              background: "linear-gradient(135deg, #a5b4fc, #8b5cf6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.02em",
+            }}>
+              ContentAudit<span style={{ opacity: 0.7 }}>Pro</span>
+            </span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to={createPageUrl("Dashboard")}
+              style={{ color: "#64748b", fontSize: "13px", fontWeight: 500, textDecoration: "none" }}
+            >
+              Zaloguj
+            </Link>
+            <Link
+              to={createPageUrl("Dashboard")}
+              style={{
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                color: "white",
+                borderRadius: "10px",
+                padding: "8px 16px",
+                fontSize: "13px",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              Rozpocznij za darmo
+            </Link>
           </div>
-          <span className="font-bold text-lg tracking-tight" style={{ color: "#e2e8f0" }}>
-            ContentAudit<span style={{ color: "#6366f1" }}>Pro</span>
-          </span>
         </div>
-        <Link
-          to={createPageUrl("Dashboard")}
-          style={{ color: "#6366f1" }}
-          className="text-sm font-medium hover:opacity-80 transition-opacity"
-        >
-          Zaloguj się →
-        </Link>
       </nav>
 
       {/* Hero */}
