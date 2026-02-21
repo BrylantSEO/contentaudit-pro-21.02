@@ -22,35 +22,29 @@ function injectGA(measurementId) {
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const gaId = localStorage.getItem(GA_KEY);
     if (gaId) injectGA(gaId);
   }, []);
 
-  const isPublic = PUBLIC_PAGES.includes(currentPageName);
-  const needsAuth = AUTH_REQUIRED_PAGES.includes(currentPageName);
-
-  // If page requires auth and user is not loaded yet, show nothing (loading)
-  // If user is null after loading, redirect to login
-  const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    if (needsAuth && !user && authChecked) {
-      base44.auth.redirectToLogin();
-    }
-  }, [needsAuth, user, authChecked]);
-
-  // Track when auth check is done
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const me = await base44.auth.me();
-        setUser(me);
-        if (me) {
-          await base44.functions.invoke("ensureUserProfile", {});
+      // First try isAuthenticated (works for public apps)
+      const isAuth = await base44.auth.isAuthenticated();
+      if (isAuth) {
+        try {
+          const me = await base44.auth.me();
+          setUser(me);
+          if (me) {
+            base44.functions.invoke("ensureUserProfile", {}).catch(() => {});
+          }
+        } catch (e) {
+          console.log("Auth error:", e);
+          setUser(null);
         }
-      } catch (e) {
+      } else {
         setUser(null);
       }
       setAuthChecked(true);
@@ -58,16 +52,13 @@ export default function Layout({ children, currentPageName }) {
     checkAuth();
   }, []);
 
-  if (needsAuth && !authChecked) {
-    return (
-      <div style={{ minHeight: "100vh", background: "#0c0c0c", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#475569", fontSize: "14px" }}>Ładowanie...</div>
-      </div>
-    );
-  }
+  const isPublic = PUBLIC_PAGES.includes(currentPageName);
+  const needsAuth = AUTH_REQUIRED_PAGES.includes(currentPageName);
 
-  if (needsAuth && !user && authChecked) {
-    return null; // will redirect
+  // Redirect to login if auth-required page and user not logged in
+  if (needsAuth && authChecked && !user) {
+    base44.auth.redirectToLogin();
+    return null;
   }
 
   return (
