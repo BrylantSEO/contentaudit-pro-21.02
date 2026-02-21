@@ -139,8 +139,8 @@ export default function AuditNew() {
     const freshProfile = freshProfiles?.[0];
     const freshBalance = freshProfile?.credits_balance ?? 0;
 
-    // 3. Check balance
-    if (freshBalance < totalCost) {
+    // 3. Check balance (admins bypass credit check)
+    if (!isAdmin && freshBalance < totalCost) {
       setInsufficientModal({ needed: totalCost, have: freshBalance });
       return;
     }
