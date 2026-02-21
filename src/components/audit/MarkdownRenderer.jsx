@@ -39,7 +39,9 @@ function preprocessMarkdown(raw) {
 function isTableRow(line) {
   if (!line) return false;
   const trimmed = line.trim();
-  return trimmed.includes("|") && trimmed.split("|").length >= 3;
+  // Must start or end with pipe and have at least 3 pipe-separated cells
+  if (!trimmed.startsWith("|") && !trimmed.endsWith("|")) return false;
+  return trimmed.split("|").filter(c => c.trim() !== "").length >= 2;
 }
 
 function isSeparatorRow(line) {
