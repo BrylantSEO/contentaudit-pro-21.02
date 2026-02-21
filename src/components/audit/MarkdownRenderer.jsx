@@ -126,43 +126,54 @@ const mdComponents = {
   ol: ({ children }) => <ol style={{ paddingLeft: "22px", margin: "10px 0" }}>{children}</ol>,
   strong: ({ children }) => <strong style={{ color: "#e2e8f0", fontWeight: 700 }}>{children}</strong>,
   em: ({ children }) => <em style={{ color: "#94a3b8", fontStyle: "italic" }}>{children}</em>,
-  code: ({ inline, children }) => {
-    if (inline) {
+  code: ({ inline, className, children }) => {
+    // Check if it's a code block (has language class or is inside pre)
+    if (!inline && className) {
+      return (
+        <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'JetBrains Mono', 'SF Mono', monospace", lineHeight: 1.6 }}>
+          {children}
+        </code>
+      );
+    }
+    if (inline || (!className && !String(children).includes("\n"))) {
       return (
         <code style={{
-          background: "rgba(99,102,241,0.12)",
+          background: "rgba(99,102,241,0.1)",
           borderRadius: "5px",
-          padding: "2px 8px",
-          fontSize: "12px",
+          padding: "1px 7px",
+          fontSize: "13px",
           color: "#c7d2fe",
-          fontFamily: "'SF Mono', monospace",
+          fontFamily: "inherit",
+          fontWeight: 500,
         }}>{children}</code>
       );
     }
     return (
-      <pre style={{
-        background: "rgba(15,15,30,0.8)",
-        borderRadius: "12px",
-        padding: "18px 20px",
-        margin: "16px 0",
-        overflowX: "auto",
-        border: "1px solid rgba(99,102,241,0.15)",
-      }}>
-        <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'SF Mono', monospace", lineHeight: 1.6 }}>
-          {children}
-        </code>
-      </pre>
+      <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'JetBrains Mono', 'SF Mono', monospace", lineHeight: 1.6 }}>
+        {children}
+      </code>
     );
   },
+  pre: ({ children }) => (
+    <pre style={{
+      background: "rgba(15,15,30,0.8)",
+      borderRadius: "12px",
+      padding: "18px 20px",
+      margin: "16px 0",
+      overflowX: "auto",
+      border: "1px solid rgba(99,102,241,0.15)",
+    }}>
+      {children}
+    </pre>
+  ),
   blockquote: ({ children }) => (
     <blockquote style={{
       borderLeft: "3px solid #6366f1",
       paddingLeft: "18px",
       margin: "16px 0",
-      color: "#94a3b8",
-      fontStyle: "italic",
+      color: "#b0bec5",
       background: "rgba(99,102,241,0.05)",
-      padding: "12px 18px",
+      padding: "14px 20px",
       borderRadius: "0 10px 10px 0",
     }}>{children}</blockquote>
   ),
