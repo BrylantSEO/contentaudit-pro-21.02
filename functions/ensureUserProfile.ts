@@ -16,18 +16,18 @@ Deno.serve(async (req) => {
             return Response.json({ profile: existing[0], created: false });
         }
 
-        // Create new profile with 10 free credits
+        // Create new profile with 50 free credits
         const profile = await base44.entities.UserProfile.create({
-            credits_balance: 10,
+            credits_balance: 50,
             plan: "free"
         });
 
         // Log the initial credit grant
         await base44.entities.CreditTransaction.create({
             user_id: profile.id,
-            amount: 10,
+            amount: 50,
             type: "purchase",
-            description: "Darmowe kredyty powitalne"
+            description: "Darmowe kredyty powitalne (50)"
         });
 
         return Response.json({ profile, created: true });
