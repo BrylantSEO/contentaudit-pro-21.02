@@ -94,10 +94,19 @@ export default function Billing() {
     }
   };
 
-  // Success / cancel banners
+  // Show toast on success (once transactions load)
   const params = new URLSearchParams(window.location.search);
   const isSuccess = params.get("success") === "1";
   const isCancelled = params.get("cancelled") === "1";
+
+  useEffect(() => {
+    if (isSuccess && transactions.length > 0) {
+      const lastPurchase = transactions.find((tx) => tx.type === "purchase");
+      if (lastPurchase) {
+        toast.success(`Dodano ${lastPurchase.amount} kredytów do Twojego konta!`, { duration: 5000 });
+      }
+    }
+  }, [isSuccess, transactions.length]);
 
   const balance = profile?.credits_balance ?? "—";
   const plan = PLAN_LABELS[profile?.plan] ?? "—";
