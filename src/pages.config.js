@@ -51,6 +51,7 @@ import Dashboard from './pages/Dashboard';
 import Credits from './pages/Credits';
 import Settings from './pages/Settings';
 import Home from './pages/Home';
+import AuditNew from './pages/AuditNew';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +60,7 @@ export const PAGES = {
     "Credits": Credits,
     "Settings": Settings,
     "Home": Home,
+    "AuditNew": AuditNew,
 }
 
 export const pagesConfig = {
