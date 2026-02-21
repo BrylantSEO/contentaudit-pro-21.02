@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 
 /**
@@ -124,9 +124,20 @@ const mdComponents = {
   p: ({ children }) => (
     <p style={{ color: "#b0bec5", lineHeight: 1.8, margin: "12px 0", fontSize: "14px" }}>{children}</p>
   ),
-  li: ({ children }) => (
-    <li style={{ color: "#b0bec5", fontSize: "14px", lineHeight: 1.8, marginBottom: "4px" }}>{children}</li>
-  ),
+  li: ({ children }) => {
+    // Detect checklist items: [ ] or [x] at the start
+    const textContent = extractText(children);
+    const uncheckedMatch = textContent.match(/^\[\s*\]\s*/);
+    const checkedMatch = textContent.match(/^\[\s*[xX]\s*\]\s*/);
+    
+    if (uncheckedMatch || checkedMatch) {
+      return <ChecklistItem checked={!!checkedMatch}>{children}</ChecklistItem>;
+    }
+    
+    return (
+      <li style={{ color: "#b0bec5", fontSize: "14px", lineHeight: 1.8, marginBottom: "4px" }}>{children}</li>
+    );
+  },
   ul: ({ children }) => <ul style={{ paddingLeft: "22px", margin: "10px 0", listStyleType: "disc" }}>{children}</ul>,
   ol: ({ children }) => <ol style={{ paddingLeft: "22px", margin: "10px 0" }}>{children}</ol>,
   strong: ({ children }) => <strong style={{ color: "#e2e8f0", fontWeight: 700 }}>{children}</strong>,
@@ -220,6 +231,106 @@ const mdComponents = {
     }}>{children}</td>
   ),
 };
+
+// Helper: extract plain text from React children tree
+function extractText(children) {
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) return children.map(extractText).join("");
+  if (children?.props?.children) return extractText(children.props.children);
+  return "";
+}
+
+// Strip the [ ] / [x] prefix from rendered children
+function stripCheckboxPrefix(children) {
+  if (!children) return children;
+  
+  const processNode = (node) => {
+    if (typeof node === "string") {
+      return node.replace(/^\[\s*[xX]?\s*\]\s*/, "");
+    }
+    return node;
+  };
+  
+  if (Array.isArray(children)) {
+    const result = [...children];
+    for (let i = 0; i < result.length; i++) {
+      const processed = processNode(result[i]);
+      if (processed !== result[i]) {
+        result[i] = processed;
+        return result;
+      }
+      // Check nested in <p> or <strong>
+      if (result[i]?.props?.children) {
+        const inner = result[i].props.children;
+        if (typeof inner === "string") {
+          const stripped = inner.replace(/^\[\s*[xX]?\s*\]\s*/, "");
+          if (stripped !== inner) {
+            result[i] = React.cloneElement(result[i], {}, stripped);
+            return result;
+          }
+        }
+        if (Array.isArray(inner)) {
+          const newInner = stripCheckboxPrefix(inner);
+          if (newInner !== inner) {
+            result[i] = React.cloneElement(result[i], {}, ...newInner);
+            return result;
+          }
+        }
+      }
+    }
+    return result;
+  }
+  
+  return processNode(children);
+}
+
+function ChecklistItem({ checked: initialChecked, children }) {
+  const [checked, setChecked] = useState(initialChecked);
+  
+  const toggle = useCallback(() => setChecked(prev => !prev), []);
+  const strippedChildren = stripCheckboxPrefix(children);
+  
+  return (
+    <li
+      onClick={toggle}
+      style={{
+        color: checked ? "#475569" : "#b0bec5",
+        fontSize: "14px",
+        lineHeight: 1.8,
+        marginBottom: "6px",
+        listStyle: "none",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "10px",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+        textDecoration: checked ? "line-through" : "none",
+        opacity: checked ? 0.6 : 1,
+        userSelect: "none",
+      }}
+    >
+      <span style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "20px",
+        height: "20px",
+        minWidth: "20px",
+        borderRadius: "6px",
+        marginTop: "3px",
+        border: checked ? "none" : "2px solid rgba(99,102,241,0.4)",
+        background: checked ? "rgba(74,222,128,0.2)" : "transparent",
+        color: checked ? "#4ade80" : "transparent",
+        fontSize: "12px",
+        fontWeight: 700,
+        transition: "all 0.2s ease",
+      }}>
+        {checked ? "✓" : ""}
+      </span>
+      <span style={{ flex: 1 }}>{strippedChildren}</span>
+    </li>
+  );
+}
 
 export default function MarkdownRenderer({ content }) {
   if (!content) {
