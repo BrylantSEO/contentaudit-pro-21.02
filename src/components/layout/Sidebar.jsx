@@ -1,14 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../../utils";
-import { LayoutDashboard, Coins, Settings, LogOut, Menu, X, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { LayoutDashboard, Coins, Settings, LogOut, Menu, X, Zap, CreditCard } from "lucide-react";
 
 const navItems = [
-  // keep existing items below
   { name: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
-  { name: "Kredyty", page: "Credits", icon: Coins },
+  { name: "Doładuj kredyty", page: "Billing", icon: CreditCard },
   { name: "Ustawienia", page: "Settings", icon: Settings },
 ];
 
