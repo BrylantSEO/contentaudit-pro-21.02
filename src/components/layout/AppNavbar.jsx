@@ -85,40 +85,75 @@ export default function AppNavbar({ currentPageName, user }) {
           {/* Center nav — desktop */}
           <div className="hidden md:flex items-center gap-1" style={{ flex: 1, justifyContent: "center" }}>
             {NAV_LINKS.map((item) => {
-              const isActive = currentPageName === item.page;
-              return (
-                <Link
-                  key={item.page}
-                  to={createPageUrl(item.page)}
-                  style={{
-                    textDecoration: "none",
-                    padding: "7px 16px",
-                    borderRadius: "6px",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: isActive ? "#f97316" : "#a89e92",
-                    background: isActive ? "rgba(249,115,22,0.1)" : "transparent",
-                    transition: "all 0.15s",
-                    letterSpacing: "0.01em",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
-                  {isActive && (
-                    <span style={{
-                      width: "5px",
-                      height: "5px",
-                      background: "#f97316",
-                      clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
-                      display: "inline-block",
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  {item.label}
-                </Link>
-              );
-            })}
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page}
+                      to={createPageUrl(item.page)}
+                      style={{
+                        textDecoration: "none",
+                        padding: "7px 16px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: isActive ? "#f97316" : "#a89e92",
+                        background: isActive ? "rgba(249,115,22,0.1)" : "transparent",
+                        transition: "all 0.15s",
+                        letterSpacing: "0.01em",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {isActive && (
+                        <span style={{
+                          width: "5px",
+                          height: "5px",
+                          background: "#f97316",
+                          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
+                          display: "inline-block",
+                          flexShrink: 0,
+                        }} />
+                      )}
+                      {item.label}
+                    </Link>
+                  );
+                })}
+                {isAdmin && ADMIN_LINKS.map((item) => {
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page}
+                      to={createPageUrl(item.page)}
+                      style={{
+                        textDecoration: "none",
+                        padding: "7px 16px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: isActive ? "#f97316" : "#f9731680",
+                        background: isActive ? "rgba(249,115,22,0.1)" : "transparent",
+                        transition: "all 0.15s",
+                        letterSpacing: "0.01em",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {isActive && (
+                        <span style={{
+                          width: "5px",
+                          height: "5px",
+                          background: "#f97316",
+                          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
+                          display: "inline-block",
+                          flexShrink: 0,
+                        }} />
+                      )}
+                      {item.label}
+                    </Link>
+                  );
+                })}
           </div>
 
           {/* Right side */}

@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import PageMeta from "../components/layout/PageMeta";
 import { format } from "date-fns";
 import { CreditCard, Zap, Sparkles, Rocket } from "lucide-react";
+import RedeemCodeBox from "../components/credits/RedeemCodeBox";
 import { toast } from "sonner";
 
 const PLAN_LABELS = { free: "Free", starter: "Starter", pro: "Pro", agency: "Agency" };
@@ -149,6 +150,12 @@ export default function Billing() {
           </div>
           <p style={{ color: "#475569", fontSize: "13px", marginTop: "8px" }}>Plan: <span style={{ color: "#c7d2fe", fontWeight: 600 }}>{plan}</span></p>
         </div>
+
+        {/* Section — Promo code */}
+        <RedeemCodeBox onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        }} />
 
         {/* Section 2 — Packages */}
         <div>
