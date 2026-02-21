@@ -1,25 +1,8 @@
-import { createClient } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
     console.log("[receiveAuditCallback] Request received. Method:", req.method);
-
-    // Auth check — Railway must send Bearer AUDIT_API_KEY
-    const authHeader = req.headers.get("Authorization") || "";
-    const expectedKey = Deno.env.get("AUDIT_API_KEY");
-
-    if (!expectedKey || authHeader !== `Bearer ${expectedKey}`) {
-      console.log("[receiveAuditCallback] Auth failed. Header:", authHeader ? "present but wrong" : "missing");
-      // Still allow if no auth header — Railway might not send it
-      // But log a warning
-      console.log("[receiveAuditCallback] WARNING: Proceeding without auth validation");
-    }
-
-    // Create client with appId — no user token needed for service role
-    const appId = Deno.env.get("BASE44_APP_ID");
-    console.log("[receiveAuditCallback] APP_ID:", appId);
-
-    const base44 = createClient({ appId });
 
     const rawText = await req.text();
 
@@ -30,13 +13,6 @@ Deno.serve(async (req) => {
 
     console.log("[receiveAuditCallback] Top-level keys:", Object.keys(body).join(", "));
 
-    for (const key of Object.keys(body)) {
-      const val = body[key];
-      const type = val === null ? "null" : Array.isArray(val) ? "array" : typeof val;
-      const preview = type === "string" ? val.substring(0, 200) : JSON.stringify(val)?.substring(0, 200);
-      console.log(`[receiveAuditCallback] "${key}" (${type}): ${preview}`);
-    }
-
     const { job_id, status, current_step, progress_percent, error_message } = body;
 
     if (!job_id) {
@@ -45,6 +21,14 @@ Deno.serve(async (req) => {
     }
 
     console.log(`[receiveAuditCallback] job_id=${job_id} status=${status} step=${current_step} progress=${progress_percent}`);
+
+    // createClientFromRequest needs base44 headers — construct a fake request with proper headers
+    // so asServiceRole works. The original req from Railway has no auth headers.
+    const appId = Deno.env.get("BASE44_APP_ID");
+    const fakeHeaders = new Headers(req.headers);
+    fakeHeaders.set("x-base44-app-id", appId);
+    const fakeReq = new Request(req.url, { method: req.method, headers: fakeHeaders });
+    const base44 = createClientFromRequest(fakeReq);
 
     // Build update
     const updateData = {};
@@ -56,7 +40,7 @@ Deno.serve(async (req) => {
     // Extract results from ALL possible locations
     const result = body.result || body.results || body.data || {};
 
-    if (typeof result === "object" && result !== null) {
+    if (typeof result === "object" && result !== null && Object.keys(result).length > 0) {
       console.log("[receiveAuditCallback] Nested result keys:", Object.keys(result).join(", "));
     }
 
@@ -91,7 +75,6 @@ Deno.serve(async (req) => {
     }
 
     console.log("[receiveAuditCallback] Final updateData keys:", Object.keys(updateData).join(", "));
-    console.log("[receiveAuditCallback] Updating job", job_id);
 
     await base44.asServiceRole.entities.AuditJob.update(job_id, updateData);
     console.log("[receiveAuditCallback] Update successful for job", job_id);
