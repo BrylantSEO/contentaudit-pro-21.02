@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
         url: job.url,
         keyword: job.keyword || null,
         model: job.model,
-        modules: job.modules || [],
+        // Railway API only accepts optional modules (serp5, serp10, exa, senuto, pdf)
+        modules: (job.modules || []).filter(m => ["serp5", "serp10", "exa", "senuto", "pdf"].includes(m)),
         job_id: job.id,
         callback_url: callbackUrl || null,
       }),
