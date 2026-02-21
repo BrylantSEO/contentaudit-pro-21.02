@@ -84,17 +84,70 @@ Deno.serve(async (req) => {
       return Response.json({ error: errorText }, { status: response.status });
     }
 
-    const result = await response.json();
-    console.log(`[runAudit] Railway response: ${JSON.stringify(result)}`);
-
-    // Save railway job ID if returned
-    if (result.job_id) {
-      await base44.asServiceRole.entities.AuditJob.update(jobId, {
-        railway_job_id: result.job_id,
-      });
+    const resultText = await response.text();
+    console.log(`[runAudit] Railway raw response (first 3000 chars): ${resultText.substring(0, 3000)}`);
+    
+    let result;
+    try {
+      result = JSON.parse(resultText);
+    } catch (e) {
+      console.log(`[runAudit] Response is not JSON`);
+      return Response.json({ success: true, raw: resultText.substring(0, 500) });
     }
 
-    return Response.json({ success: true, railway_job_id: result.job_id || null });
+    console.log(`[runAudit] Railway response keys: ${Object.keys(result).join(", ")}`);
+    
+    // Log every key with type and preview
+    for (const key of Object.keys(result)) {
+      const val = result[key];
+      const type = val === null ? "null" : Array.isArray(val) ? "array" : typeof val;
+      const preview = type === "string" ? val.substring(0, 200) : JSON.stringify(val)?.substring(0, 200);
+      console.log(`[runAudit] "${key}" (${type}): ${preview}`);
+    }
+
+    // Check if Railway returns results directly (synchronous mode)
+    const nested = result.result || result.results || result.data || {};
+    if (typeof nested === "object" && nested !== null && Object.keys(nested).length > 0) {
+      console.log(`[runAudit] Nested result keys: ${Object.keys(nested).join(", ")}`);
+      for (const key of Object.keys(nested)) {
+        const val = nested[key];
+        const type = val === null ? "null" : typeof val;
+        const preview = type === "string" ? val.substring(0, 200) : JSON.stringify(val)?.substring(0, 200);
+        console.log(`[runAudit] nested."${key}" (${type}): ${preview}`);
+      }
+    }
+
+    // Try to extract results — maybe Railway returns everything synchronously
+    const cqs = result.cqs ?? result.result_cqs ?? nested?.cqs ?? nested?.result_cqs ?? nested?.content_quality_score;
+    const citability = result.citability ?? result.result_citability ?? nested?.citability ?? nested?.result_citability;
+    const auditMd = result.audit_md ?? result.result_audit_md ?? result.report ?? nested?.audit_md ?? nested?.result_audit_md ?? nested?.report;
+    const scoresMd = result.scores_md ?? result.result_scores_md ?? result.scores ?? nested?.scores_md ?? nested?.result_scores_md ?? nested?.scores;
+    const benchmarkMd = result.benchmark_md ?? result.result_benchmark_md ?? result.benchmark ?? nested?.benchmark_md ?? nested?.result_benchmark_md ?? nested?.benchmark;
+
+    const hasResults = cqs !== undefined || auditMd;
+    console.log(`[runAudit] Has inline results: ${hasResults}, cqs=${cqs}, auditMd=${auditMd ? auditMd.length + ' chars' : 'null'}`);
+
+    const updateData = {};
+    if (result.job_id) updateData.railway_job_id = result.job_id;
+
+    if (hasResults) {
+      // Railway returned results synchronously — save them now
+      updateData.status = "done";
+      updateData.progress_percent = 100;
+      updateData.completed_at = new Date().toISOString();
+      if (cqs !== undefined && cqs !== null) updateData.result_cqs = Number(cqs);
+      if (citability !== undefined && citability !== null) updateData.result_citability = Number(citability);
+      if (auditMd) updateData.result_audit_md = auditMd;
+      if (scoresMd) updateData.result_scores_md = scoresMd;
+      if (benchmarkMd) updateData.result_benchmark_md = benchmarkMd;
+      console.log(`[runAudit] Saving inline results to job ${jobId}`);
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await base44.asServiceRole.entities.AuditJob.update(jobId, updateData);
+    }
+
+    return Response.json({ success: true, has_inline_results: hasResults, railway_job_id: result.job_id || null });
 
   } catch (error) {
     console.error(`[runAudit] Unexpected error: ${error.message}`);
