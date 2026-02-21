@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Copy, Check, RotateCcw, FileDown } from "lucide-react";
 import { format } from "date-fns";
 
