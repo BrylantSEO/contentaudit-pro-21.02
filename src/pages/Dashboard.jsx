@@ -116,7 +116,13 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser);
+    base44.auth.me().then((me) => {
+      if (!me) {
+        base44.auth.redirectToLogin();
+        return;
+      }
+      setUser(me);
+    });
   }, []);
 
   const { data: profiles } = useQuery({
