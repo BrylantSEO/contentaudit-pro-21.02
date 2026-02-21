@@ -133,10 +133,38 @@ const mdComponents = {
   hr: () => <hr style={{ border: "none", borderTop: "1px solid rgba(255,255,255,0.08)", margin: "28px 0" }} />,
 };
 
+function isUrl(str) {
+  return typeof str === "string" && (str.startsWith("http://") || str.startsWith("https://"));
+}
+
+function useFetchMarkdown(value) {
+  const [content, setContent] = useState(isUrl(value) ? null : value);
+  const [loading, setLoading] = useState(isUrl(value));
+
+  React.useEffect(() => {
+    if (!isUrl(value)) {
+      setContent(value);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetch(value)
+      .then(r => r.text())
+      .then(text => { setContent(text); setLoading(false); })
+      .catch(() => { setContent("_Nie udało się pobrać raportu._"); setLoading(false); });
+  }, [value]);
+
+  return { content, loading };
+}
+
 export default function AuditDone({ job }) {
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+
+  const auditMd = useFetchMarkdown(job.result_audit_md);
+  const scoresMd = useFetchMarkdown(job.result_scores_md);
+  const benchmarkMd = useFetchMarkdown(job.result_benchmark_md);
 
   const hasBenchmark = !!job.result_benchmark_md;
   const hasPdf = Array.isArray(job.modules) && job.modules.includes("pdf");
@@ -147,13 +175,13 @@ export default function AuditDone({ job }) {
   const cqsColor = cqs > 70 ? "#4ade80" : cqs >= 40 ? "#fbbf24" : "#f87171";
 
   const copyReport = async () => {
-    await navigator.clipboard.writeText(job.result_audit_md || "");
+    await navigator.clipboard.writeText(auditMd.content || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const exportMd = () => {
-    const blob = new Blob([job.result_audit_md || ""], { type: "text/markdown" });
+    const blob = new Blob([auditMd.content || ""], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -172,10 +200,10 @@ export default function AuditDone({ job }) {
     }))}`);
   };
 
-  const currentContent =
-    activeTab === 0 ? job.result_audit_md :
-    activeTab === 1 ? job.result_scores_md :
-    job.result_benchmark_md;
+  const tabs = [auditMd, scoresMd, benchmarkMd];
+  const currentTab = tabs[activeTab];
+  const currentContent = currentTab?.content;
+  const currentLoading = currentTab?.loading;
 
   return (
     <div style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
@@ -336,9 +364,13 @@ export default function AuditDone({ job }) {
           padding: "32px",
           minHeight: "400px",
         }}>
-          <ReactMarkdown components={mdComponents}>
-            {currentContent || "_Brak danych._"}
-          </ReactMarkdown>
+          {currentLoading ? (
+            <div style={{ color: "#475569", textAlign: "center", padding: "40px" }}>Ładowanie raportu...</div>
+          ) : (
+            <ReactMarkdown components={mdComponents}>
+              {currentContent || "_Brak danych._"}
+            </ReactMarkdown>
+          )}
         </div>
       </div>
     </div>
