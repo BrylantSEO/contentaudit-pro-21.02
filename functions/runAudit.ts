@@ -31,9 +31,14 @@ Deno.serve(async (req) => {
       current_step: "initializing",
     });
 
-    const railwayApiUrl = Deno.env.get("RAILWAY_API_URL");
+    let railwayApiUrl = Deno.env.get("RAILWAY_API_URL") || "";
     const auditApiKey = Deno.env.get("AUDIT_API_KEY");
     const callbackUrl = Deno.env.get("RAILWAY_CALLBACK_URL");
+
+    // Ensure URL has protocol
+    if (railwayApiUrl && !railwayApiUrl.startsWith("http")) {
+      railwayApiUrl = "https://" + railwayApiUrl;
+    }
 
     if (!railwayApiUrl || !auditApiKey) {
       await base44.asServiceRole.entities.AuditJob.update(jobId, {
@@ -42,6 +47,8 @@ Deno.serve(async (req) => {
       });
       return Response.json({ error: "Missing env secrets" }, { status: 500 });
     }
+
+    console.log(`[runAudit] Calling Railway: ${railwayApiUrl}/api/audit/run`);
 
     // Send request to Railway API
     const response = await fetch(`${railwayApiUrl}/api/audit/run`, {
