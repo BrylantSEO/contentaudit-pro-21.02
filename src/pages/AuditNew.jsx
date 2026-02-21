@@ -157,18 +157,18 @@ export default function AuditNew() {
 
     const shortUrl = url.length > 40 ? url.slice(0, 40) + "…" : url;
 
-    // 4a. Create transaction
-    await base44.entities.CreditTransaction.create({
-      user_id: freshProfile.id,
-      amount: -totalCost,
-      type: "spend",
-      description: `Audyt: ${shortUrl}`,
-    });
-
-    // 4b. Deduct credits
-    await base44.entities.UserProfile.update(freshProfile.id, {
-      credits_balance: freshBalance - totalCost,
-    });
+    // 4a. Create transaction & deduct credits (skip for admins)
+    if (!isAdmin) {
+      await base44.entities.CreditTransaction.create({
+        user_id: freshProfile.id,
+        amount: -totalCost,
+        type: "spend",
+        description: `Audyt: ${shortUrl}`,
+      });
+      await base44.entities.UserProfile.update(freshProfile.id, {
+        credits_balance: freshBalance - totalCost,
+      });
+    }
 
     // 4c. Create AuditJob
     const job = await base44.entities.AuditJob.create({
