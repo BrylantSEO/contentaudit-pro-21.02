@@ -114,19 +114,65 @@ export default function AuditNew() {
   const balance = profile?.credits_balance ?? 0;
   const canAfford = balance >= totalCost;
 
+  // Disable SERP checkboxes when keyword is empty
+  const serpDisabled = !keyword.trim();
+
   // ─── Submit ──────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!url) return;
+    // 1. URL validation
+    setUrlError("");
+    if (!url.trim()) {
+      setUrlError("URL jest wymagany.");
+      return;
+    }
+    try {
+      new URL(url.trim());
+    } catch {
+      setUrlError("Podaj poprawny adres URL (np. https://example.com/artykul).");
+      return;
+    }
+
+    // 2. Re-fetch fresh balance
+    const freshProfiles = await base44.entities.UserProfile.filter({ created_by: user.email });
+    const freshProfile = freshProfiles?.[0];
+    const freshBalance = freshProfile?.credits_balance ?? 0;
+
+    // 3. Check balance
+    if (freshBalance < totalCost) {
+      setInsufficientModal({ needed: totalCost, have: freshBalance });
+      return;
+    }
+
     setSubmitting(true);
-    const modules = [
-      "crawl", "structure", "scoring", "report",
-      ...OPTIONAL_MODULES.filter((m) => optionalModules[m.id]).map((m) => m.id),
-    ];
-    const mode = keyword ? "full" : "content-only";
+
+    const selectedOptional = OPTIONAL_MODULES.filter((m) => optionalModules[m.id]).map((m) => m.id);
+    const modules = ["crawl", "structure", "scoring", "report", ...selectedOptional];
+
+    const hasSerp = optionalModules.serp5 || optionalModules.serp10;
+    const mode = keyword.trim()
+      ? hasSerp ? "full" : "content-only"
+      : "content-only";
+
+    const shortUrl = url.length > 40 ? url.slice(0, 40) + "…" : url;
+
+    // 4a. Create transaction
+    await base44.entities.CreditTransaction.create({
+      user_id: freshProfile.id,
+      amount: -totalCost,
+      type: "spend",
+      description: `Audyt: ${shortUrl}`,
+    });
+
+    // 4b. Deduct credits
+    await base44.entities.UserProfile.update(freshProfile.id, {
+      credits_balance: freshBalance - totalCost,
+    });
+
+    // 4c. Create AuditJob
     const job = await base44.entities.AuditJob.create({
-      user_id: profile?.id ?? "",
-      url,
-      keyword: keyword || undefined,
+      user_id: freshProfile.id,
+      url: url.trim(),
+      keyword: keyword.trim() || undefined,
       mode,
       model: selectedModel,
       modules,
@@ -135,6 +181,7 @@ export default function AuditNew() {
       progress_percent: 0,
       created_at: new Date().toISOString(),
     });
+
     setSubmitting(false);
     navigate(createPageUrl(`AuditDetail?id=${job.id}`));
   };
