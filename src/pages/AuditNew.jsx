@@ -112,8 +112,9 @@ export default function AuditNew() {
     return cost;
   }, [selectedModel, optionalModules, model]);
 
+  const isAdmin = user?.role === "admin";
   const balance = profile?.credits_balance ?? 0;
-  const canAfford = balance >= totalCost;
+  const canAfford = isAdmin || balance >= totalCost;
 
   // Disable SERP checkboxes when keyword is empty
   const serpDisabled = !keyword.trim();
