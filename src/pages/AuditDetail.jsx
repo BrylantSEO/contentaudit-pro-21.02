@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { base44 } from "@/api/base44Client";
-import AuditRunning from "../components/audit/AuditRunning";
-import AuditDone from "../components/audit/AuditDone";
-import AuditError from "../components/audit/AuditError";
+import AuditRunning from "@/components/audit/AuditRunning";
+import AuditDone from "@/components/audit/AuditDone";
+import AuditError from "@/components/audit/AuditError";
 
 export default function AuditDetail() {
   const [job, setJob] = useState(null);
