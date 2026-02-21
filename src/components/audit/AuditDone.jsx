@@ -336,7 +336,7 @@ export default function AuditDone({ job }) {
           padding: "32px",
           minHeight: "400px",
         }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+          <ReactMarkdown components={mdComponents}>
             {currentContent || "_Brak danych._"}
           </ReactMarkdown>
         </div>
