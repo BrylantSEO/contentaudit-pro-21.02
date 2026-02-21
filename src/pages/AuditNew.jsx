@@ -231,10 +231,13 @@ export default function AuditNew() {
               placeholder="https://example.com/artykul"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              style={S.input}
-              onFocus={(e) => (e.target.style.borderColor = "rgba(99,102,241,0.6)")}
-              onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
+              style={{ ...S.input, borderColor: urlError ? "rgba(248,113,113,0.6)" : S.input.border }}
+              onFocus={(e) => (e.target.style.borderColor = urlError ? "rgba(248,113,113,0.8)" : "rgba(99,102,241,0.6)")}
+              onBlur={(e) => (e.target.style.borderColor = urlError ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.1)")}
             />
+            {urlError && (
+              <p style={{ color: "#f87171", fontSize: "12px", marginTop: "4px" }}>{urlError}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label style={S.label}>Fraza kluczowa <span style={{ color: "#334155" }}>(opcjonalna)</span></label>
