@@ -128,42 +128,42 @@ const mdComponents = {
   ol: ({ children }) => <ol style={{ paddingLeft: "22px", margin: "10px 0" }}>{children}</ol>,
   strong: ({ children }) => <strong style={{ color: "#e2e8f0", fontWeight: 700 }}>{children}</strong>,
   em: ({ children }) => <em style={{ color: "#94a3b8", fontStyle: "italic" }}>{children}</em>,
-  code: ({ inline, className, children }) => {
-    // Check if it's a code block (has language class or is inside pre)
-    if (!inline && className) {
-      return (
-        <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'JetBrains Mono', 'SF Mono', monospace", lineHeight: 1.6 }}>
-          {children}
-        </code>
-      );
-    }
-    if (inline || (!className && !String(children).includes("\n"))) {
+  code: ({ node, inline, className, children, ...props }) => {
+    const content = String(children).replace(/\n$/, "");
+    const isBlock = className || content.includes("\n") || content.length > 120;
+    
+    // Inline code — render as small colored badge
+    if (inline || !isBlock) {
       return (
         <code style={{
           background: "rgba(99,102,241,0.1)",
-          borderRadius: "5px",
-          padding: "1px 7px",
+          border: "1px solid rgba(99,102,241,0.15)",
+          borderRadius: "6px",
+          padding: "2px 8px",
           fontSize: "13px",
           color: "#c7d2fe",
           fontFamily: "inherit",
           fontWeight: 500,
+          whiteSpace: "nowrap",
         }}>{children}</code>
       );
     }
+    // Block code inside <pre>
     return (
-      <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'JetBrains Mono', 'SF Mono', monospace", lineHeight: 1.6 }}>
+      <code style={{ color: "#c7d2fe", fontSize: "13px", fontFamily: "'JetBrains Mono', 'SF Mono', monospace", lineHeight: 1.7 }}>
         {children}
       </code>
     );
   },
   pre: ({ children }) => (
     <pre style={{
-      background: "rgba(15,15,30,0.8)",
+      background: "rgba(15,15,30,0.6)",
       borderRadius: "12px",
-      padding: "18px 20px",
+      padding: "20px 24px",
       margin: "16px 0",
       overflowX: "auto",
-      border: "1px solid rgba(99,102,241,0.15)",
+      border: "1px solid rgba(99,102,241,0.12)",
+      fontSize: "13px",
     }}>
       {children}
     </pre>
