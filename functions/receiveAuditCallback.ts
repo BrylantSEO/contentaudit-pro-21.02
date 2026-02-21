@@ -1,16 +1,21 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+async function uploadLargeField(base44, content, filename) {
+  const blob = new Blob([content], { type: "text/markdown" });
+  const file = new File([blob], filename, { type: "text/markdown" });
+  const { file_url } = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+  return file_url;
+}
+
 Deno.serve(async (req) => {
   try {
     console.log("[receiveAuditCallback] Request received. Method:", req.method);
 
     const rawText = await req.text();
-
     console.log("[receiveAuditCallback] ===== RAW TEXT (first 3000 chars) =====");
     console.log(rawText.substring(0, 3000));
 
     const body = JSON.parse(rawText);
-
     console.log("[receiveAuditCallback] Top-level keys:", Object.keys(body).join(", "));
 
     const { job_id, status, current_step, progress_percent, error_message } = body;
@@ -22,8 +27,7 @@ Deno.serve(async (req) => {
 
     console.log(`[receiveAuditCallback] job_id=${job_id} status=${status} step=${current_step} progress=${progress_percent}`);
 
-    // createClientFromRequest needs base44 headers — construct a fake request with proper headers
-    // so asServiceRole works. The original req from Railway has no auth headers.
+    // Build base44 client with app ID header for service role access
     const appId = Deno.env.get("BASE44_APP_ID");
     const fakeHeaders = new Headers(req.headers);
     fakeHeaders.set("x-base44-app-id", appId);
@@ -52,12 +56,47 @@ Deno.serve(async (req) => {
 
     console.log("[receiveAuditCallback] Extracted cqs:", cqs);
     console.log("[receiveAuditCallback] Extracted auditMd:", auditMd ? `${auditMd.length} chars` : "null");
+    console.log("[receiveAuditCallback] Extracted scoresMd:", scoresMd ? `${scoresMd.length} chars` : "null");
+    console.log("[receiveAuditCallback] Extracted benchmarkMd:", benchmarkMd ? `${benchmarkMd.length} chars` : "null");
 
     if (cqs !== undefined && cqs !== null) updateData.result_cqs = Number(cqs);
     if (citability !== undefined && citability !== null) updateData.result_citability = Number(citability);
-    if (auditMd) updateData.result_audit_md = auditMd;
-    if (scoresMd) updateData.result_scores_md = scoresMd;
-    if (benchmarkMd) updateData.result_benchmark_md = benchmarkMd;
+
+    // Upload large markdown fields as files to avoid size limits
+    const SIZE_LIMIT = 5000;
+
+    if (auditMd) {
+      if (auditMd.length > SIZE_LIMIT) {
+        console.log("[receiveAuditCallback] audit_md too large, uploading as file...");
+        const url = await uploadLargeField(base44, auditMd, `audit_${job_id}.md`);
+        updateData.result_audit_md = url;
+        console.log("[receiveAuditCallback] audit_md uploaded:", url);
+      } else {
+        updateData.result_audit_md = auditMd;
+      }
+    }
+
+    if (scoresMd) {
+      if (scoresMd.length > SIZE_LIMIT) {
+        console.log("[receiveAuditCallback] scores_md too large, uploading as file...");
+        const url = await uploadLargeField(base44, scoresMd, `scores_${job_id}.md`);
+        updateData.result_scores_md = url;
+        console.log("[receiveAuditCallback] scores_md uploaded:", url);
+      } else {
+        updateData.result_scores_md = scoresMd;
+      }
+    }
+
+    if (benchmarkMd) {
+      if (benchmarkMd.length > SIZE_LIMIT) {
+        console.log("[receiveAuditCallback] benchmark_md too large, uploading as file...");
+        const url = await uploadLargeField(base44, benchmarkMd, `benchmark_${job_id}.md`);
+        updateData.result_benchmark_md = url;
+        console.log("[receiveAuditCallback] benchmark_md uploaded:", url);
+      } else {
+        updateData.result_benchmark_md = benchmarkMd;
+      }
+    }
 
     if (status === "done" || status === "error") {
       updateData.completed_at = new Date().toISOString();
