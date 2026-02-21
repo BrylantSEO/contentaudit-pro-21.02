@@ -511,7 +511,7 @@ export default function AuditNew() {
 }
 
 // ─── Module row component ─────────────────────────────────────────────────────
-function ModuleRow({ label, cost, checked, disabled, onChange }) {
+function ModuleRow({ label, cost, checked, disabled, dimmed, onChange }) {
   return (
     <div
       style={{
@@ -519,11 +519,13 @@ function ModuleRow({ label, cost, checked, disabled, onChange }) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "13px 20px",
-        background: disabled ? "rgba(255,255,255,0.02)" : "transparent",
+        background: disabled && !dimmed ? "rgba(255,255,255,0.02)" : "transparent",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
-        cursor: disabled ? "default" : "pointer",
+        cursor: (disabled || dimmed) ? "default" : "pointer",
+        opacity: dimmed ? 0.4 : 1,
+        transition: "opacity 0.2s",
       }}
-      onClick={disabled ? undefined : onChange}
+      onClick={(disabled || dimmed) ? undefined : onChange}
     >
       <div className="flex items-center gap-3">
         {/* Checkbox */}
