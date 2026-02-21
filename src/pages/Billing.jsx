@@ -22,12 +22,25 @@ const TX_TYPES = {
 export default function Billing() {
   const [user, setUser] = useState(null);
   const [buying, setBuying] = useState(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then((u) => {
       if (!u) { base44.auth.redirectToLogin(); return; }
       setUser(u);
     });
+  }, []);
+
+  // Handle success redirect from Stripe
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "1") {
+      // Refetch profile & transactions after a short delay (webhook may not have fired yet)
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      }, 2000);
+    }
   }, []);
 
   const { data: profiles } = useQuery({
