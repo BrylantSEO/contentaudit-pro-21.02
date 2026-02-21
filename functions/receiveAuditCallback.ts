@@ -1,26 +1,12 @@
-import { createClient } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
-    // This endpoint is called by Railway (external service) — no user auth.
-    // Authenticate via AUDIT_API_KEY in Authorization header instead.
-    const authHeader = req.headers.get("Authorization") || "";
-    const expectedKey = Deno.env.get("AUDIT_API_KEY");
-
     console.log("[receiveAuditCallback] Request received. Method:", req.method);
-    console.log("[receiveAuditCallback] Auth header present:", !!authHeader);
+    console.log("[receiveAuditCallback] URL:", req.url);
+    console.log("[receiveAuditCallback] Headers:", JSON.stringify(Object.fromEntries(req.headers.entries())).substring(0, 500));
 
-    // Allow requests with valid API key OR without auth (Railway might not send it)
-    // We log it but don't block — Railway callback format may vary
-    if (expectedKey && authHeader && authHeader !== `Bearer ${expectedKey}`) {
-      console.log("[receiveAuditCallback] Auth mismatch but proceeding anyway");
-    }
-
-    // Use service role client (no user token needed for external callbacks)
-    const base44 = createClient({
-      appId: Deno.env.get("BASE44_APP_ID"),
-      serviceRoleKey: Deno.env.get("BASE44_SERVICE_ROLE_KEY"),
-    });
+    const base44 = createClientFromRequest(req);
 
     const rawText = await req.text();
     
@@ -99,23 +85,23 @@ Deno.serve(async (req) => {
     console.log("[receiveAuditCallback] Final updateData keys:", Object.keys(updateData).join(", "));
     console.log("[receiveAuditCallback] Final updateData:", JSON.stringify(updateData).substring(0, 2000));
 
-    await base44.entities.AuditJob.update(job_id, updateData);
+    await base44.asServiceRole.entities.AuditJob.update(job_id, updateData);
     console.log("[receiveAuditCallback] Update successful for job", job_id);
 
     // Handle credit refund on error
     if (status === "error") {
-      const job = await base44.entities.AuditJob.get(job_id);
+      const job = await base44.asServiceRole.entities.AuditJob.get(job_id);
       if (job?.credits_cost && job?.user_id) {
-        const profiles = await base44.entities.UserProfile.filter({ id: job.user_id });
+        const profiles = await base44.asServiceRole.entities.UserProfile.filter({ id: job.user_id });
         const profile = profiles?.[0];
-        await base44.entities.CreditTransaction.create({
+        await base44.asServiceRole.entities.CreditTransaction.create({
           user_id: job.user_id,
           amount: job.credits_cost,
           type: "refund",
           description: "Zwrot: błąd audytu",
         });
         if (profile) {
-          await base44.entities.UserProfile.update(profile.id, {
+          await base44.asServiceRole.entities.UserProfile.update(profile.id, {
             credits_balance: (profile.credits_balance || 0) + job.credits_cost,
           });
         }
