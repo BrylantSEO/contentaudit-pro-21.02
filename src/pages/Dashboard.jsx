@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import PageMeta from "../components/layout/PageMeta";
 import { Plus, Coins, CreditCard, ExternalLink, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";

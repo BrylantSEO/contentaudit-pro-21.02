@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import PageMeta from "../components/layout/PageMeta";
 import {
   ArrowRight, Zap, ChevronDown, Link2, Sliders, FileText,
   Target, AlignLeft, Database, MapPin, Cpu, BarChart2, BookOpen, Tag, Shield, Check

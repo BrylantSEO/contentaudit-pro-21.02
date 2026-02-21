@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import PageMeta from "../components/layout/PageMeta";
 import { format } from "date-fns";
 import { CreditCard, Zap, Sparkles, Rocket } from "lucide-react";
 import { toast } from "sonner";
