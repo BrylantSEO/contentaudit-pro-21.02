@@ -211,6 +211,7 @@ export default function AuditNew() {
     <div
       style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif", paddingBottom: "100px" }}
     >
+      <PageMeta title={keyword ? `Audyt: ${keyword} — ContentAudit Pro` : "Nowy audyt — ContentAudit Pro"} />
       <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
 
         {/* Header */}
