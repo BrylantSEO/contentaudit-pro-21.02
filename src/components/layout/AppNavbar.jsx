@@ -11,6 +11,10 @@ const NAV_LINKS = [
   { label: "Kredyty", page: "Billing" },
 ];
 
+const ADMIN_LINKS = [
+  { label: "Admin kredyty", page: "AdminCredits" },
+];
+
 export default function AppNavbar({ currentPageName, user }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
