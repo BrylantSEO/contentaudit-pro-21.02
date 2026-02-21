@@ -26,20 +26,6 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     const gaId = localStorage.getItem(GA_KEY);
     if (gaId) injectGA(gaId);
-
-    const loadUser = async () => {
-      try {
-        const me = await base44.auth.me();
-        setUser(me);
-        if (me) {
-          await base44.functions.invoke("ensureUserProfile", {});
-        }
-      } catch (e) {
-        console.log("User not logged in:", e);
-        setUser(null);
-      }
-    };
-    loadUser();
   }, []);
 
   const isPublic = PUBLIC_PAGES.includes(currentPageName);
