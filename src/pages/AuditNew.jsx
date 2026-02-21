@@ -334,16 +334,21 @@ export default function AuditNew() {
               );
             })}
             {/* Optional */}
-            {OPTIONAL_MODULES.map((m) => (
-              <ModuleRow
-                key={m.id}
-                label={m.label}
-                cost={m.cost}
-                checked={!!optionalModules[m.id]}
-                disabled={false}
-                onChange={() => toggleOptional(m.id)}
-              />
-            ))}
+            {OPTIONAL_MODULES.map((m) => {
+              const isSerp = m.id === "serp5" || m.id === "serp10";
+              const isDisabled = isSerp && serpDisabled;
+              return (
+                <ModuleRow
+                  key={m.id}
+                  label={m.label}
+                  cost={m.cost}
+                  checked={!!optionalModules[m.id]}
+                  disabled={isDisabled}
+                  dimmed={isDisabled}
+                  onChange={() => toggleOptional(m.id)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
