@@ -137,9 +137,31 @@ Deno.serve(async (req) => {
       updateData.completed_at = new Date().toISOString();
       if (cqs !== undefined && cqs !== null) updateData.result_cqs = Number(cqs);
       if (citability !== undefined && citability !== null) updateData.result_citability = Number(citability);
-      if (auditMd) updateData.result_audit_md = auditMd;
-      if (scoresMd) updateData.result_scores_md = scoresMd;
-      if (benchmarkMd) updateData.result_benchmark_md = benchmarkMd;
+
+      // Upload large markdown fields as files to avoid entity size limits
+      const SIZE_LIMIT = 5000;
+      const uploadField = async (content, name) => {
+        const blob = new Blob([content], { type: "text/markdown" });
+        const file = new File([blob], name, { type: "text/markdown" });
+        const { file_url } = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+        return file_url;
+      };
+
+      if (auditMd) {
+        updateData.result_audit_md = auditMd.length > SIZE_LIMIT
+          ? await uploadField(auditMd, `audit_${jobId}.md`)
+          : auditMd;
+      }
+      if (scoresMd) {
+        updateData.result_scores_md = scoresMd.length > SIZE_LIMIT
+          ? await uploadField(scoresMd, `scores_${jobId}.md`)
+          : scoresMd;
+      }
+      if (benchmarkMd) {
+        updateData.result_benchmark_md = benchmarkMd.length > SIZE_LIMIT
+          ? await uploadField(benchmarkMd, `benchmark_${jobId}.md`)
+          : benchmarkMd;
+      }
       console.log(`[runAudit] Saving inline results to job ${jobId}`);
     }
 
