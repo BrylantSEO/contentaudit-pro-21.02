@@ -43,6 +43,46 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const isPublic = PUBLIC_PAGES.includes(currentPageName);
+  const needsAuth = AUTH_REQUIRED_PAGES.includes(currentPageName);
+
+  // If page requires auth and user is not loaded yet, show nothing (loading)
+  // If user is null after loading, redirect to login
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    if (needsAuth && !user && authChecked) {
+      base44.auth.redirectToLogin();
+    }
+  }, [needsAuth, user, authChecked]);
+
+  // Track when auth check is done
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const me = await base44.auth.me();
+        setUser(me);
+        if (me) {
+          await base44.functions.invoke("ensureUserProfile", {});
+        }
+      } catch (e) {
+        setUser(null);
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, []);
+
+  if (needsAuth && !authChecked) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0c0c0c", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "#475569", fontSize: "14px" }}>Ładowanie...</div>
+      </div>
+    );
+  }
+
+  if (needsAuth && !user && authChecked) {
+    return null; // will redirect
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#0c0c0c", fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}>
