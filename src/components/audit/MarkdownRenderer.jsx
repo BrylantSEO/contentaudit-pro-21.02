@@ -9,7 +9,10 @@ import ReactMarkdown from "react-markdown";
 function preprocessMarkdown(raw) {
   if (!raw) return "";
 
-  const lines = raw.split("\n");
+  // Unescape pipes that may come from fetch (\| → |)
+  let cleaned = raw.replace(/\\\|/g, "|");
+
+  const lines = cleaned.split("\n");
   const result = [];
   let i = 0;
 
