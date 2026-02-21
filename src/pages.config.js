@@ -49,22 +49,24 @@
  */
 import AuditDetail from './pages/AuditDetail';
 import AuditNew from './pages/AuditNew';
+import Billing from './pages/Billing';
 import Credits from './pages/Credits';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Settings from './pages/Settings';
-import Billing from './pages/Billing';
+import AdminCredits from './pages/AdminCredits';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AuditDetail": AuditDetail,
     "AuditNew": AuditNew,
+    "Billing": Billing,
     "Credits": Credits,
     "Dashboard": Dashboard,
     "Home": Home,
     "Settings": Settings,
-    "Billing": Billing,
+    "AdminCredits": AdminCredits,
 }
 
 export const pagesConfig = {
