@@ -107,6 +107,25 @@ export default function BeforeAfterBlock({ content }) {
           );
         }
 
+        if (block.type === "rationale") {
+          return (
+            <div key={i} className="pt-1 px-1">
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                <span className="font-bold text-foreground">Uzasadnienie: </span>
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <span>{children}</span>,
+                    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                    code: ({ children }) => <code className="bg-muted px-1 py-0.5 rounded text-[11px]">{children}</code>,
+                  }}
+                >
+                  {block.text}
+                </ReactMarkdown>
+              </div>
+            </div>
+          );
+        }
+
         // "other" — general instruction
         return (
           <div key={i} className="rounded-lg border border-border bg-muted/40 p-3">
