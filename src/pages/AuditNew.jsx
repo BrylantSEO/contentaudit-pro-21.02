@@ -114,6 +114,37 @@ export default function AuditNew() {
   }, [selectedModel, optionalModules, model]);
 
   const isAdmin = user?.role === "admin";
+
+  // ─── Mock Submit ─────────────────────────────────────────────────────
+  const handleMockSubmit = async () => {
+    setUrlError("");
+    const testUrl = url.trim() || "https://example.com/mock-article";
+
+    setMockSubmitting(true);
+
+    const selectedOptional = OPTIONAL_MODULES.filter((m) => optionalModules[m.id]).map((m) => m.id);
+    const modules = ["crawl", "structure", "scoring", "report", ...selectedOptional];
+
+    // Create AuditJob without deducting credits
+    const job = await base44.entities.AuditJob.create({
+      user_id: "mock",
+      url: testUrl,
+      keyword: keyword.trim() || "mock keyword",
+      mode: "full",
+      model: selectedModel,
+      modules,
+      credits_cost: 0,
+      status: "queued",
+      progress_percent: 0,
+      created_at: new Date().toISOString(),
+    });
+
+    // Trigger mock audit
+    base44.functions.invoke("runMockAudit", { job_id: job.id }).catch(console.error);
+
+    setMockSubmitting(false);
+    navigate(createPageUrl(`AuditDetail?id=${job.id}`));
+  };
   const balance = profile?.credits_balance ?? 0;
   const canAfford = isAdmin || balance >= totalCost;
 
