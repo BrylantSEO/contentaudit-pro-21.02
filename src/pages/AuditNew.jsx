@@ -495,50 +495,75 @@ export default function AuditNew() {
           </div>
 
           {/* CTA */}
-          {canAfford ? (
-            <button
-              onClick={handleSubmit}
-              disabled={!url || submitting}
-              style={{
-                background: (!url || submitting) ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                color: "white",
-                borderRadius: "14px",
-                padding: "12px 24px",
-                fontWeight: 700,
-                fontSize: "14px",
-                border: "none",
-                cursor: (!url || submitting) ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "opacity 0.2s",
-                opacity: (!url || submitting) ? 0.6 : 1,
-              }}
-            >
-              {submitting ? "Uruchamianie…" : "Uruchom audyt"}
-              {!submitting && <ArrowRight className="w-4 h-4" />}
-            </button>
-          ) : (
-            <Link
-              to={createPageUrl("Credits")}
-              style={{
-                background: "rgba(234,179,8,0.15)",
-                border: "1px solid rgba(234,179,8,0.3)",
-                color: "#fbbf24",
-                borderRadius: "14px",
-                padding: "12px 24px",
-                fontWeight: 700,
-                fontSize: "14px",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <CreditCard className="w-4 h-4" />
-              Doładuj kredyty
-            </Link>
-          )}
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            {isAdmin && (
+              <button
+                onClick={handleMockSubmit}
+                disabled={mockSubmitting}
+                style={{
+                  background: "rgba(234,179,8,0.12)",
+                  border: "1px solid rgba(234,179,8,0.3)",
+                  color: "#fbbf24",
+                  borderRadius: "14px",
+                  padding: "12px 18px",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: mockSubmitting ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  opacity: mockSubmitting ? 0.6 : 1,
+                }}
+              >
+                <FlaskConical className="w-4 h-4" />
+                {mockSubmitting ? "Mock…" : "Mock"}
+              </button>
+            )}
+            {canAfford ? (
+              <button
+                onClick={handleSubmit}
+                disabled={!url || submitting}
+                style={{
+                  background: (!url || submitting) ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  color: "white",
+                  borderRadius: "14px",
+                  padding: "12px 24px",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  border: "none",
+                  cursor: (!url || submitting) ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "opacity 0.2s",
+                  opacity: (!url || submitting) ? 0.6 : 1,
+                }}
+              >
+                {submitting ? "Uruchamianie…" : "Uruchom audyt"}
+                {!submitting && <ArrowRight className="w-4 h-4" />}
+              </button>
+            ) : (
+              <Link
+                to={createPageUrl("Credits")}
+                style={{
+                  background: "rgba(234,179,8,0.15)",
+                  border: "1px solid rgba(234,179,8,0.3)",
+                  color: "#fbbf24",
+                  borderRadius: "14px",
+                  padding: "12px 24px",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <CreditCard className="w-4 h-4" />
+                Doładuj kredyty
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>
