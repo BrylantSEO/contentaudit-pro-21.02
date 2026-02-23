@@ -82,6 +82,7 @@ export default function AuditNew() {
     serp5: false, serp10: false, exa: false, senuto: false, pdf: false,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [mockSubmitting, setMockSubmitting] = useState(false);
   const [urlError, setUrlError] = useState("");
   const [insufficientModal, setInsufficientModal] = useState(null); // { needed, have }
 
