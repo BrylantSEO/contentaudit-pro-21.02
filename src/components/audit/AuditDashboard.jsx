@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, AlertCircle, AlertTriangle, CheckCircle2 } from
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
 } from "recharts";
+import BeforeAfterBlock from "./BeforeAfterBlock";
 
 const PRIORITY_CONFIG = {
   critical: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30", border: "border-red-200 dark:border-red-800", badge: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400", label: "Krytyczne" },
