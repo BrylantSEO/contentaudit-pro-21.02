@@ -38,12 +38,10 @@ export default function AuditDetail() {
     return found;
   }, [jobId]);
 
-  // Initial load
   useEffect(() => {
     if (user) fetchJob();
   }, [user, fetchJob]);
 
-  // Polling every 5s — just refresh from DB (Railway sends callbacks)
   useEffect(() => {
     if (!job || (job.status !== "queued" && job.status !== "running")) return;
     const interval = setInterval(async () => {
@@ -57,8 +55,8 @@ export default function AuditDetail() {
 
   if (loading) {
     return (
-      <div style={{ background: "#0a0a0f", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#475569", fontSize: "14px" }}>Ładowanie...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground text-sm">Ładowanie...</div>
       </div>
     );
   }
@@ -66,7 +64,7 @@ export default function AuditDetail() {
   if (!job) return null;
 
   return (
-    <div style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-background text-foreground font-['Inter',sans-serif]">
       {(job.status === "queued" || job.status === "running") && <AuditRunning job={job} />}
       {job.status === "done" && <AuditDone job={job} />}
       {job.status === "error" && <AuditError job={job} />}

@@ -1,27 +1,32 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
-import { Copy, Check, RotateCcw, FileDown } from "lucide-react";
+import { Copy, Check, RotateCcw, FileDown, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Badge } from "@/components/ui/badge";
 import AuditResultsView from "./AuditResultsView";
 import { format } from "date-fns";
 
 function ScoreBadge({ label, value, max }) {
   const pct = max === 100 ? value : (value / max) * 100;
-  const color = pct > 70 ? "#4ade80" : pct >= 40 ? "#fbbf24" : "#f87171";
+  const color = pct > 70 ? "text-green-600" : pct >= 40 ? "text-amber-500" : "text-red-500";
+  const desc = max === 100
+    ? (pct > 70 ? "Świetna" : pct >= 40 ? "Do poprawy" : "Wymaga pracy")
+    : (value >= 7 ? "Wysoka" : value >= 4 ? "Średnia" : "Niska");
+
   return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ fontSize: "48px", fontWeight: 800, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+    <div className="text-center">
+      <div className={`text-5xl font-extrabold tabular-nums leading-none ${color}`}>
         {value}
-        <span style={{ fontSize: "20px", color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>/{max}</span>
+        <span className="text-xl text-muted-foreground/40 font-normal">/{max}</span>
       </div>
-      <div style={{ color: "#94a3b8", fontSize: "12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: "6px" }}>
+      <div className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mt-1.5">
         {label}
       </div>
+      <div className={`text-xs font-medium mt-0.5 ${color}`}>{desc}</div>
     </div>
   );
 }
-
-// Tabs are now handled inside AuditResultsView
 
 function isUrl(str) {
   return typeof str === "string" && (str.startsWith("http://") || str.startsWith("https://"));
@@ -50,6 +55,7 @@ function useFetchMarkdown(value) {
 export default function AuditDone({ job }) {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const auditMd = useFetchMarkdown(job.result_audit_md);
   const scoresMd = useFetchMarkdown(job.result_scores_md);
@@ -60,7 +66,8 @@ export default function AuditDone({ job }) {
 
   const cqs = job.result_cqs ?? 0;
   const citability = job.result_citability ?? 0;
-  const cqsColor = cqs > 70 ? "#4ade80" : cqs >= 40 ? "#fbbf24" : "#f87171";
+  const cqsPct = cqs;
+  const cqsColorCls = cqsPct > 70 ? "border-green-300 dark:border-green-700" : cqsPct >= 40 ? "border-amber-300 dark:border-amber-700" : "border-red-300 dark:border-red-700";
 
   const copyReport = async () => {
     await navigator.clipboard.writeText(auditMd.content || "");
@@ -89,96 +96,68 @@ export default function AuditDone({ job }) {
   };
 
   return (
-    <div style={{ background: "#0a0a0f", color: "#e2e8f0", minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-background text-foreground font-['Inter',sans-serif]">
 
-      {/* ─── Sticky header ────────────────────────────────────────────────── */}
-      <div style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 40,
-        background: "rgba(10,10,15,0.88)",
-        backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
-        padding: "12px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: "20px",
-        flexWrap: "wrap",
-      }}>
+      {/* Sticky header */}
+      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-xl border-b border-border px-4 sm:px-6 py-3 flex items-center gap-4 flex-wrap">
         {/* CQS pill */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          background: `${cqsColor}15`,
-          border: `1px solid ${cqsColor}40`,
-          borderRadius: "999px",
-          padding: "5px 14px",
-          flexShrink: 0,
-        }}>
-          <span style={{ color: cqsColor, fontWeight: 800, fontSize: "18px" }}>{cqs}</span>
-          <span style={{ color: "#64748b", fontSize: "11px", fontWeight: 600, textTransform: "uppercase" }}>CQS</span>
+        <div className={`flex items-center gap-2 ${cqsColorCls} border rounded-full px-3.5 py-1.5 shrink-0`}>
+          <span className={`font-extrabold text-lg tabular-nums ${cqsPct > 70 ? "text-green-600" : cqsPct >= 40 ? "text-amber-500" : "text-red-500"}`}>{cqs}</span>
+          <span className="text-muted-foreground text-[11px] font-semibold uppercase">CQS</span>
         </div>
 
         {/* URL */}
-        <span style={{ color: "#64748b", fontSize: "13px", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span className="text-muted-foreground text-sm flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
           {job.url}
         </span>
 
         {/* Keyword */}
         {job.keyword && (
-          <span style={{
-            background: "rgba(99,102,241,0.15)",
-            border: "1px solid rgba(99,102,241,0.3)",
-            borderRadius: "999px",
-            padding: "3px 12px",
-            fontSize: "12px",
-            color: "#c7d2fe",
-            fontWeight: 600,
-            flexShrink: 0,
-          }}>
-            🔑 {job.keyword}
-          </span>
+          <Badge variant="secondary" className="shrink-0 text-xs">
+            {job.keyword}
+          </Badge>
         )}
+
+        {/* Theme toggle */}
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+          title={theme === "dark" ? "Jasny motyw" : "Ciemny motyw"}
+        >
+          {theme === "dark" ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+        </button>
       </div>
 
-      {/* ─── Main content ─────────────────────────────────────────────────── */}
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      {/* Main content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 
         {/* Banner */}
-        <div style={{
-          background: "rgba(255,255,255,0.03)",
-          border: `1px solid ${cqsColor}30`,
-          borderRadius: "24px",
-          padding: "32px",
-          marginBottom: "32px",
-          boxShadow: `0 0 40px ${cqsColor}10`,
-        }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "40px", alignItems: "center", marginBottom: "24px" }}>
+        <div className={`bg-card border ${cqsColorCls} rounded-2xl p-6 sm:p-8 mb-8 shadow-sm`}>
+          <div className="flex flex-wrap gap-8 sm:gap-12 items-center mb-6">
             <ScoreBadge label="CQS Score" value={cqs} max={100} />
-            <div style={{ width: "1px", height: "60px", background: "rgba(255,255,255,0.08)" }} />
+            <div className="w-px h-14 bg-border hidden sm:block" />
             <ScoreBadge label="AI Citability" value={citability} max={10} />
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", marginTop: "4px" }}>
+          <div className="flex flex-wrap gap-x-8 gap-y-3 mt-2">
             <div>
-              <span style={{ color: "#475569", fontSize: "11px", fontWeight: 600, textTransform: "uppercase" }}>URL</span>
-              <p style={{ color: "#94a3b8", fontSize: "13px", wordBreak: "break-all", marginTop: "2px" }}>{job.url}</p>
+              <span className="text-muted-foreground text-[11px] font-semibold uppercase">URL</span>
+              <p className="text-sm text-muted-foreground break-all mt-0.5">{job.url}</p>
             </div>
             {job.keyword && (
               <div>
-                <span style={{ color: "#475569", fontSize: "11px", fontWeight: 600, textTransform: "uppercase" }}>Fraza</span>
-                <p style={{ color: "#6366f1", fontSize: "13px", marginTop: "2px" }}>{job.keyword}</p>
+                <span className="text-muted-foreground text-[11px] font-semibold uppercase">Fraza</span>
+                <p className="text-sm text-indigo-600 dark:text-indigo-400 mt-0.5">{job.keyword}</p>
               </div>
             )}
             <div>
-              <span style={{ color: "#475569", fontSize: "11px", fontWeight: 600, textTransform: "uppercase" }}>Model</span>
-              <p style={{ color: "#94a3b8", fontSize: "13px", marginTop: "2px" }}>{job.model}</p>
+              <span className="text-muted-foreground text-[11px] font-semibold uppercase">Model</span>
+              <p className="text-sm text-muted-foreground mt-0.5">{job.model}</p>
             </div>
             {job.completed_at && (
               <div>
-                <span style={{ color: "#475569", fontSize: "11px", fontWeight: 600, textTransform: "uppercase" }}>Data</span>
-                <p style={{ color: "#94a3b8", fontSize: "13px", marginTop: "2px" }}>
+                <span className="text-muted-foreground text-[11px] font-semibold uppercase">Data</span>
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {format(new Date(job.completed_at), "dd.MM.yyyy HH:mm")}
                 </p>
               </div>
@@ -186,55 +165,33 @@ export default function AuditDone({ job }) {
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: "flex", gap: "12px", marginTop: "24px", flexWrap: "wrap" }}>
-            <button onClick={copyReport} style={{
-              display: "flex", alignItems: "center", gap: "8px",
-              background: copied ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.06)",
-              border: `1px solid ${copied ? "rgba(74,222,128,0.3)" : "rgba(255,255,255,0.1)"}`,
-              borderRadius: "12px", padding: "10px 18px",
-              color: copied ? "#4ade80" : "#94a3b8", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-              transition: "all 0.2s",
-            }}>
+          <div className="flex gap-3 mt-6 flex-wrap">
+            <button onClick={copyReport} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all border ${
+              copied
+                ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-600"
+                : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
+            }`}>
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Skopiowano!" : "Kopiuj raport"}
             </button>
 
             {hasPdf && (
-              <button onClick={exportMd} style={{
-                display: "flex", alignItems: "center", gap: "8px",
-                background: "rgba(234,179,8,0.1)",
-                border: "1px solid rgba(234,179,8,0.3)",
-                borderRadius: "12px", padding: "10px 18px",
-                color: "#fbbf24", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-              }}>
+              <button onClick={exportMd} className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-2.5 text-amber-600 text-sm font-semibold cursor-pointer">
                 <FileDown className="w-4 h-4" />
                 Eksportuj PDF
               </button>
             )}
 
-            <button onClick={rerun} style={{
-              display: "flex", alignItems: "center", gap: "8px",
-              background: "rgba(99,102,241,0.12)",
-              border: "1px solid rgba(99,102,241,0.3)",
-              borderRadius: "12px", padding: "10px 18px",
-              color: "#c7d2fe", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-            }}>
+            <button onClick={rerun} className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-xl px-4 py-2.5 text-indigo-600 dark:text-indigo-400 text-sm font-semibold cursor-pointer">
               <RotateCcw className="w-4 h-4" />
               Uruchom ponownie
             </button>
           </div>
         </div>
 
-        {/* Results — reorganized by user value */}
+        {/* Results */}
         {isLoading ? (
-          <div style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: "20px",
-            padding: "60px 32px",
-            textAlign: "center",
-            color: "#475569",
-          }}>
+          <div className="bg-card border border-border rounded-2xl p-16 text-center text-muted-foreground">
             Ładowanie raportu...
           </div>
         ) : (
@@ -242,6 +199,9 @@ export default function AuditDone({ job }) {
             auditMd={auditMd.content}
             scoresMd={scoresMd.content}
             benchmarkMd={benchmarkMd.content}
+            cqs={cqs}
+            citability={citability}
+            jobId={job.id}
           />
         )}
       </div>

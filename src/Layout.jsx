@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import AppNavbar from "./components/layout/AppNavbar";
+import { ThemeProvider } from "next-themes";
 
 const PUBLIC_PAGES = ["Home"];
 const AUTH_REQUIRED_PAGES = ["Dashboard", "AuditNew", "AuditDetail", "Credits", "Billing", "Settings", "AdminCredits"];
@@ -31,7 +32,6 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // First try isAuthenticated (works for public apps)
       const isAuth = await base44.auth.isAuthenticated();
       if (isAuth) {
         try {
@@ -55,90 +55,71 @@ export default function Layout({ children, currentPageName }) {
   const isPublic = PUBLIC_PAGES.includes(currentPageName);
   const needsAuth = AUTH_REQUIRED_PAGES.includes(currentPageName);
 
-  // Redirect to login if auth-required page and user not logged in
   if (needsAuth && authChecked && !user) {
     base44.auth.redirectToLogin();
     return null;
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0c0c0c", fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap');
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <div className="min-h-screen bg-background text-foreground font-['Inter','Helvetica_Neue',sans-serif]">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap');
 
-        * { box-sizing: border-box; }
-        body {
-          font-family: 'Inter', 'Helvetica Neue', sans-serif;
-          background: #0c0c0c;
-          color: #f0ebe3;
-          margin: 0;
-        }
+          * { box-sizing: border-box; }
 
-        /* Triangle grid texture — like Brand Professor */
-        .bp-texture {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          z-index: 0;
-          background-image:
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpolygon points='14,4 24,22 4,22' fill='none' stroke='rgba(255,255,255,0.045)' stroke-width='1'/%3E%3C/svg%3E");
-          background-size: 28px 28px;
-        }
+          /* Orange accent */
+          .accent { color: #f97316; }
+          .accent-bg { background: #f97316; }
 
-        /* Orange accent */
-        .accent { color: #f97316; }
-        .accent-bg { background: #f97316; }
+          /* Serif display */
+          .serif {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-style: italic;
+          }
 
-        /* Serif display */
-        .serif {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-style: italic;
-        }
+          /* Marquee ticker */
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .marquee-inner {
+            display: flex;
+            width: max-content;
+            animation: marquee 22s linear infinite;
+          }
 
-        /* Marquee ticker */
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-inner {
-          display: flex;
-          width: max-content;
-          animation: marquee 22s linear infinite;
-        }
+          /* Page content above texture */
+          #page-content {
+            position: relative;
+            z-index: 1;
+          }
 
-        /* Page content above texture */
-        #page-content {
-          position: relative;
-          z-index: 1;
-        }
+          /* Scrollbar */
+          ::-webkit-scrollbar { width: 6px; }
+          ::-webkit-scrollbar-track { background: hsl(var(--background)); }
+          ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        `}</style>
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0c0c0c; }
-        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
-      `}</style>
-
-      {/* Triangle texture background */}
-      <div className="bp-texture" />
-
-      {/* Orange ticker strip — only on public pages */}
-      {isPublic && (
-        <div style={{ background: "#f97316", color: "#0c0c0c", overflow: "hidden", height: "36px", display: "flex", alignItems: "center" }}>
-          <div className="marquee-inner" style={{ fontWeight: 800, fontSize: "13px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            {Array(6).fill("✦ AUDYT TREŚCI POD AI SEARCH ✦ CONTENT QUALITY SCORE ✦ SEO BENCHMARK ✦ E-E-A-T ANALIZA ✦ CITABILITY SCORE ✦").map((t, i) => (
-              <span key={i} style={{ paddingRight: "40px", whiteSpace: "nowrap" }}>{t}</span>
-            ))}
+        {/* Orange ticker strip — only on public pages */}
+        {isPublic && (
+          <div className="bg-orange-500 text-black overflow-hidden h-9 flex items-center">
+            <div className="marquee-inner font-extrabold text-[13px] tracking-widest uppercase">
+              {Array(6).fill("✦ AUDYT TREŚCI POD AI SEARCH ✦ CONTENT QUALITY SCORE ✦ SEO BENCHMARK ✦ E-E-A-T ANALIZA ✦ CITABILITY SCORE ✦").map((t, i) => (
+                <span key={i} className="pr-10 whitespace-nowrap">{t}</span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {!isPublic && user && (
-        <AppNavbar currentPageName={currentPageName} user={user} />
-      )}
+        {!isPublic && user && (
+          <AppNavbar currentPageName={currentPageName} user={user} />
+        )}
 
-      <main id="page-content">
-        {children}
-      </main>
-    </div>
+        <main id="page-content">
+          {children}
+        </main>
+      </div>
+    </ThemeProvider>
   );
 }
