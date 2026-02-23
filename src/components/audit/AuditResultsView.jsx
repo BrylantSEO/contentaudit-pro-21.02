@@ -153,11 +153,17 @@ function parseAuditSections(md) {
       const priority = classifyPriority(title);
       const why = getWhyForItem(title);
 
-      // Look ahead for BEFORE/AFTER or instructions
+      // Look ahead — collect ALL content lines until next REC or ## heading
       let howToFix = "";
+      let collecting = false;
       let j = i + 1;
-      while (j < lines.length && !lines[j].match(/^\s*\*?\*?REC-/i) && !lines[j].match(/^##/)) {
-        if (/BEFORE|AFTER|ZMIEŃ|Krok|→/i.test(lines[j])) {
+      while (j < lines.length && !lines[j].match(/^\s*\*?\*?REC-/i) && !lines[j].match(/^##\s/)) {
+        const ln = lines[j].trim();
+        // Start collecting once we see BEFORE/AFTER/instruction markers
+        if (/BEFORE|AFTER|ZMIEŃ|Krok|→|Instrukcja|Wdroż|Dodaj|Usuń|Zamień/i.test(ln)) {
+          collecting = true;
+        }
+        if (collecting && ln.length > 0) {
           howToFix += lines[j] + "\n";
         }
         j++;
