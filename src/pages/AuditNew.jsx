@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CreditCard, X } from "lucide-react";
+import { ArrowRight, CreditCard, X, FlaskConical } from "lucide-react";
 import PageMeta from "../components/layout/PageMeta";
 
 // ─── Model definitions ────────────────────────────────────────────────────────
