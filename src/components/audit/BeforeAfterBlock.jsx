@@ -25,9 +25,10 @@ export default function BeforeAfterBlock({ content }) {
   for (const line of lines) {
     const stripped = line.replace(/^>\s*/, "").trim();
 
-    // Detect BEFORE: / AFTER: markers
+    // Detect BEFORE: / AFTER: / Uzasadnienie: markers
     const beforeMatch = stripped.match(/^\*?\*?BEFORE:?\*?\*?\s*(.*)/i);
     const afterMatch = stripped.match(/^\*?\*?AFTER:?\*?\*?\s*(.*)/i);
+    const rationaleMatch = stripped.match(/^\*?\*?Uzasadnienie:?\*?\*?\s*(.*)/i);
 
     if (beforeMatch) {
       flush();
@@ -37,6 +38,10 @@ export default function BeforeAfterBlock({ content }) {
       flush();
       currentType = "after";
       if (afterMatch[1].trim()) currentLines.push(afterMatch[1].trim());
+    } else if (rationaleMatch) {
+      flush();
+      currentType = "rationale";
+      if (rationaleMatch[1].trim()) currentLines.push(rationaleMatch[1].trim());
     } else if (stripped === "---" || stripped === "") {
       // skip separators and empty lines between blocks
       if (currentLines.length > 0) currentLines.push("");
