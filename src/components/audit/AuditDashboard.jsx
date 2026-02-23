@@ -105,8 +105,8 @@ function PriorityCard({ item, index }) {
               </button>
             )}
             {expanded && item.howToFix && (
-              <div className="mt-2 p-3 rounded-lg bg-background/80 border border-border text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
-                {item.howToFix}
+              <div className="mt-2">
+                <BeforeAfterBlock content={item.howToFix} />
               </div>
             )}
           </div>
